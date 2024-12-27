@@ -2,14 +2,14 @@ package com.vikas.urlshortner.controllers;
 
 
 import com.vikas.urlshortner.dtos.InputDto;
-import com.vikas.urlshortner.dtos.UrlDto;
 import com.vikas.urlshortner.services.UrlRedirectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 public class UrlShortnerController {
 
