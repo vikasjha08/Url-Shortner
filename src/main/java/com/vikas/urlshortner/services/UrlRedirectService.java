@@ -4,10 +4,12 @@ import com.vikas.urlshortner.dtos.InputDto;
 import com.vikas.urlshortner.dtos.UrlDto;
 import com.vikas.urlshortner.repository.UrlDao;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,31 +19,23 @@ public class UrlRedirectService {
 
     public UrlDto setRedirectUrl(InputDto dto) {
 
-        if(dao.findByLongUrl(dto.getLongUrl())!=null){
-            return dao.findByLongUrl(dto.getLongUrl());
-        }
-        else{
-            UrlDto urlDto = new UrlDto();
-            urlDto.setLongUrl(dto.getLongUrl());
-            urlDto.setShortUrl(createCustomShortUrl());
-            return dao.save(urlDto);
-        }
-
+        return Optional.ofNullable(dao.findByLongUrl(dto.getLongUrl())).orElseGet(() -> dao.save(
+                UrlDto.builder()
+                        .longUrl(dto.getLongUrl())
+                        .shortUrl(createCustomShortUrl())
+                        .build()
+        ));
     }
 
     private String createCustomShortUrl() {
-        List<String> allExistingShortUrl = null;
-        for (Iterator<UrlDto> itr = dao.findAll().iterator(); itr.hasNext(); ) {
-            allExistingShortUrl.add(itr.next().getShortUrl());
-        }
-        String random = createRandomShortUrl();
-        if (allExistingShortUrl == null || !allExistingShortUrl.contains(random)) {
-            return random;
+        val shortUrl = createRandomShortUrl();
+        boolean doesExist = Optional.ofNullable(dao.findByShortUrl(shortUrl)).isPresent();
+        if (!doesExist) {
+            return shortUrl;
         } else {
             createCustomShortUrl();
         }
-
-        return random;
+        return shortUrl;
     }
 
     private String createRandomShortUrl() {
